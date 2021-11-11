@@ -42,8 +42,10 @@ function displayLocation(position) {
     location.innerHTML = `You are at latitude: ${latitude}, longitude: ${longitude} with ${position.coords.accuracy} meters accuracy`;
     distance.innerHTML = `You are ${km} km from the WickedlySmart HQ`;
 
-    // // alternative condition
-    // if (km < 0.1) {
+    // alternative condition
+    // let prevKm = km;
+
+    // if (km < 1) {
     //     distance.innerHTML = 'You\'re on fire!';
     // } else {
     //     if (prevKm > km) {
@@ -52,7 +54,6 @@ function displayLocation(position) {
     //         distance.innerHTML = 'You\'re getting colder...';
     //     }
     // }
-    // prevKm = km;
 
     if (!map) {
         showMap(position.coords);
