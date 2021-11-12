@@ -1,7 +1,7 @@
 'use strict';
-let watchId, map;
+let watchId, map, prevCoords;
 
-let ourCoords = {
+const ourCoords = {
     latitude: 47.624851,
     longitude: -122.52099
 };
@@ -39,30 +39,25 @@ function clearWatch() {
 function displayLocation(position) {
     let latitude = position.coords.latitude;
     let longitude = position.coords.longitude;
-    let km = computeDistance(position.coords, ourCoords);
     let location = document.getElementById('location');
     let distance = document.getElementById('distance');
+    let km = computeDistance(position.coords, ourCoords);
 
     location.innerHTML = `You are at latitude: ${latitude}, longitude: ${longitude} with ${position.coords.accuracy} meters accuracy`;
     distance.innerHTML = `You are ${km} km from the WickedlySmart HQ`;
 
-    // alternative condition
-    // let prevKm = km;
-
-    // if (km < 1) {
-    //     distance.innerHTML = 'You\'re on fire!';
-    // } else {
-    //     if (prevKm > km) {
-    //         distance.innerHTML = 'You\'re getting hotter!';
-    //     } else {
-    //         distance.innerHTML = 'You\'re getting colder...';
-    //     }
-    // }
-
     if (!map) {
         showMap(position.coords);
+
+        prevCoords = position.coords;
     } else {
-        scrollMapToPosition(position.coords);
+        let meters = computeDistance(position.coords, prevCoords) * 1000;
+
+        if (meters > 20) {
+            scrollMapToPosition(position.coords);
+
+            prevCoords = position.coords;
+        }
     }
 }
 
@@ -91,13 +86,15 @@ function computeDistance(startCoords, destCoords) {
     let destLatRads = degreesToRadians(destCoords.latitude);
     let destLongRads = degreesToRadians(destCoords.longitude);
 
-    let distance = Math.round(Math.acos(
-        Math.sin(startLatRads) *
-        Math.sin(destLatRads) +
-        Math.cos(startLatRads) *
-        Math.cos(destLatRads) *
-        Math.cos(startLongRads - destLongRads)
-    ) * Radius);
+    let distance = Math.round(
+        Math.acos(
+            Math.sin(startLatRads) *
+            Math.sin(destLatRads) +
+            Math.cos(startLatRads) *
+            Math.cos(destLatRads) *
+            Math.cos(startLongRads - destLongRads)
+        ) * Radius
+    );
 
     return distance;
 }
@@ -112,8 +109,8 @@ function showMap(coords) {
     let googleLatAndLong = new google.maps.LatLng(coords.latitude, coords.longitude);
     let mapDiv = document.getElementById('map');
 
-    let mapOptions = {
-        zoom: 10,
+    const mapOptions = {
+        zoom: 12,
         center: googleLatAndLong,
         mapTypeId: google.maps.MapTypeId.ROADMAP
     };
@@ -128,7 +125,7 @@ function showMap(coords) {
 }
 
 function addMarker(map, latlong, title, content) {
-    let markerOptions = {
+    const markerOptions = {
         position: latlong,
         map: map,
         title: title,
@@ -137,7 +134,7 @@ function addMarker(map, latlong, title, content) {
 
     let marker = new google.maps.Marker(markerOptions);
 
-    let infoWindowOptions = {
+    const infoWindowOptions = {
         content: content,
         position: latlong
     };
